@@ -12,6 +12,7 @@ import { LogInUserDto, SignInDto } from './dtos';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SignNewTokensDto } from './dtos/sign-new-tokens.dto';
 import { TokenExpiredError } from 'jsonwebtoken';
+import { Protected } from 'src/decorators';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -40,7 +41,7 @@ export class AuthController {
   })
   @Post('/sign-in')
   async signIn(@Body() userData: SignInDto): Promise<any> {
-    try {
+    try {      
       const data = await this.service.signInUser(userData);
       if (!data) {
         return { message: 'Password yoki email xato kiritildi!' };

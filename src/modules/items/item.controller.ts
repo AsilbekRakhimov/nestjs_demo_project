@@ -15,17 +15,16 @@ import { CreateItemDto } from './dtos';
 import {
   ApiBearerAuth,
   ApiConsumes,
-  ApiHeader,
-  ApiHeaders,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { InjectModel } from '@nestjs/sequelize';
-import { ImageUploadModule } from '../image-upload';
 import { UpdateItemDto } from './dtos/update-item.dto';
+import { Protected } from 'src/decorators';
+import { AccessedRoles } from 'src/decorators/roles.decorator';
 
 @ApiTags('Item')
+@ApiBearerAuth()
 @Controller('item')
 export class ItemController {
   constructor(private service: ItemService) {}
@@ -36,6 +35,8 @@ export class ItemController {
     description: 'Add new item',
     summary: 'You can add one item here !',
   })
+  @Protected(true)
+  @AccessedRoles(['admin', 'super_admin'])
   @ApiConsumes('multipart/form-data')
   @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('image'))
@@ -56,6 +57,8 @@ export class ItemController {
     description: 'Get all items',
     summary: 'You can get all items here !',
   })
+  @ApiBearerAuth()
+  @Protected(false)
   async getItems(): Promise<any[]> {
     try {
       return await this.service.getAllItems();
@@ -66,6 +69,7 @@ export class ItemController {
 
   // ------------------------- get one item -------------------------------
   @Get('/one/:id')
+  @Protected(false)
   @ApiOperation({
     description: 'Get one item',
     summary: 'You can get one item here !',
@@ -82,6 +86,8 @@ export class ItemController {
   @Put('/update/:id')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
+  @Protected(true)
+  @AccessedRoles(['admin', 'super_admin'])
   @ApiOperation({
     description: 'Update one item',
     summary: 'You can update one item here !',
@@ -100,6 +106,8 @@ export class ItemController {
 
   // ------------------------- delete one item -------------------------------
   @Delete('/delete/:id')
+  @Protected(true)
+  @AccessedRoles(['admin', 'super_admin'])
   @ApiOperation({
     description: 'Delete one item',
     summary: 'You can delete one item here !',

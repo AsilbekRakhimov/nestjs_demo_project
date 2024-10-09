@@ -3,11 +3,11 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { ItemTableModel } from './models';
 import { ItemController } from './item.controller';
 import { ItemService } from './item.service';
-import { ImageUploadModule } from '../image-upload';
+import { ImageUploadModule, ImageUploadService } from '../file-upload';
 
 @Module({
-  imports: [SequelizeModule.forFeature([ItemTableModel]), ImageUploadModule],
+  imports: [SequelizeModule.forFeature([ItemTableModel])],
   controllers: [ItemController],
-  providers: [ItemService],
+  providers: [ItemService, ImageUploadService],
 })
 export class ItemModule {}

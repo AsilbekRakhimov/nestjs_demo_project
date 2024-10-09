@@ -9,7 +9,7 @@ import { JwtModule } from '@nestjs/jwt';
 import jwtConfig from './config/jwt.config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ExceptionHandler } from './filters';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { LoggerMiddleware } from './middlewares';
 import {
   AuthModule,
@@ -19,14 +19,14 @@ import {
   UsersModel,
 } from './modules';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 import { MulterModule } from '@nestjs/platform-express';
+import { CheckAuthGuard, CheckRolesGuard } from './guards';
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      renderPath: join(__dirname, '..', 'uploads'),
-      serveRoot: 'uploads',
+      serveRoot: '/uploads',
+      rootPath: './uploads',
     }),
     MulterModule.registerAsync({
       useFactory: () => ({
@@ -63,6 +63,14 @@ import { MulterModule } from '@nestjs/platform-express';
     {
       useClass: ExceptionHandler,
       provide: APP_FILTER,
+    },
+    {
+      useClass: CheckAuthGuard,
+      provide: APP_GUARD,
+    },
+    {
+      useClass: CheckRolesGuard,
+      provide: APP_GUARD,
     },
   ],
 })

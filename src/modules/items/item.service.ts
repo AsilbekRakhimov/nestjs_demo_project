@@ -2,28 +2,35 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { ItemTableModel } from './models';
 import { CreateItemInterface, UpdateItemInterface } from './interfaces';
-import { ImageUploadModule } from '../image-upload';
-import { join } from 'path';
-import * as fs from 'fs';
-import { where } from 'sequelize';
+import { ImageUploadService } from '../file-upload';
 
 @Injectable()
 export class ItemService {
+  #_uploadModel: ImageUploadService;
   constructor(
     @InjectModel(ItemTableModel) private itemModel: typeof ItemTableModel,
-  ) {}
+    upload: ImageUploadService,
+  ) {
+    this.#_uploadModel = upload;
+  }
 
   // create item
   async createOneItem(
     itemData: CreateItemInterface,
     image: any,
   ): Promise<void> {
+    const fileOptions = await this.#_uploadModel.uploadFile({
+      file: image,
+      destination: 'uploads/items',
+    });
+
     await this.itemModel.create({
       name: itemData.name,
       description: itemData.description,
       count: itemData.count,
       cost: itemData.cost,
       country: itemData.country,
+      image: fileOptions.imageUrl,
     });
   }
 
@@ -64,6 +71,10 @@ export class ItemService {
 
   // delete one item
   async deleteOneItem(id: number): Promise<void> {
+    const item = await this.itemModel.findByPk(id);
+
+    await this.#_uploadModel.removeFile({ fileName: item.image });
+
     await this.itemModel.destroy({
       where: {
         id,
